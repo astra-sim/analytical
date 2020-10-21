@@ -108,7 +108,9 @@ int main(int argc, char* argv[]) {
   std::string network_configuration = ""; // default configuration.json
   cmd_parser.set_if_defined("network-configuration", &network_configuration);
   if (network_configuration.empty()) {
-    std::cout << "[Analytical, function main] Network configuration file path not given!" << std::endl;
+    std::cout
+        << "[Analytical, function main] Network configuration file path not given!"
+        << std::endl;
     exit(-1);
   }
 
@@ -128,16 +130,17 @@ int main(int argc, char* argv[]) {
 
   int dimensions_count = json_configuration["dimensions-count"];
 
-  std::vector<int> packages_count_per_dim;
-  for (int node_per_dim : json_configuration["packages-count-per-dim"]) {
-    packages_count_per_dim.emplace_back(node_per_dim);
+  std::vector<int> packages_counts;
+  for (int node_per_dim : json_configuration["packages-counts"]) {
+    packages_counts.emplace_back(node_per_dim);
   }
 
-  std::vector<std::vector<int>> topology_configs_per_dim;
-  for (const auto& topology_configs_of_a_dim : json_configuration["topology-configs-per-dim"]) {
-    auto& configs = topology_configs_per_dim.emplace_back(std::vector<int>());
-    for (const auto topology_config : topology_configs_of_a_dim) {
-      configs.emplace_back(topology_config);
+  std::vector<std::vector<int>> topology_shape_configs;
+  for (const auto& topology_shape_config :
+       json_configuration["topology-shape-configs"]) {
+    auto& configs = topology_shape_configs.emplace_back(std::vector<int>());
+    for (const auto a_config : topology_shape_config) {
+      configs.emplace_back(a_config);
     }
   }
 
@@ -176,7 +179,6 @@ int main(int argc, char* argv[]) {
     hbm_scales.emplace_back(hbm_scale);
   }
 
-
   /**
    * Instantitiation: Event Queue, System, Memory, Topology, etc.
    */
@@ -185,7 +187,7 @@ int main(int argc, char* argv[]) {
 
   // compute total number of npus by multiplying counts of each dimension
   auto npus_count = 1;
-  for (auto node_per_dim : packages_count_per_dim) {
+  for (auto node_per_dim : packages_counts) {
     npus_count *= node_per_dim;
   }
 
@@ -209,6 +211,8 @@ int main(int argc, char* argv[]) {
       std::vector<Analytical::TopologyConfiguration>();
   for (int i = 0; i < dimensions_count; i++) {
     topology_configurations.emplace_back(
+        packages_counts[i], // packages count
+        topology_shape_configs[i], // topology shape configs
         link_latencies[i], // link latency (ns)
         link_bandwidths[i], // link bandwidth (GB/s) = (B/ns)
         nic_latencies[i], // nic latency (ns)
@@ -233,13 +237,10 @@ int main(int argc, char* argv[]) {
     );
     nodes_count_for_system[2] = npus_count;
   } else if (topology_name == "Torus2D") {
-    topology = std::make_shared<Analytical::Torus2D>(
-        topology_configurations, // topology configuration
-        npus_count // number of connected nodes
-    );
-    auto torus_width = (int)std::sqrt(npus_count);
-    nodes_count_for_system[1] = torus_width;
-    nodes_count_for_system[2] = torus_width;
+    topology = std::make_shared<Analytical::Torus2D>(topology_configurations);
+    // TODO: check system input dimension
+    nodes_count_for_system[1] = topology_shape_configs[0][0];
+    nodes_count_for_system[2] = topology_shape_configs[0][1];
   } else if (topology_name == "Ring") {
     topology = std::make_shared<Analytical::Ring>(
         topology_configurations, // topology configuration

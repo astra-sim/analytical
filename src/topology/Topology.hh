@@ -24,6 +24,11 @@ class Topology {
       std::vector<int>; // NPU's address, denoted by PackageID of each dimension
 
   /**
+   * Virtual destructor for Topology abstract class
+   */
+  virtual ~Topology() = 0;
+
+  /**
    * Simulate packet transmission from src to dest.
    *
    * 1. This function implements routing algorithm of a topology

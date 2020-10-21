@@ -14,11 +14,15 @@ struct TopologyConfiguration {
   using Latency = double; // latency in ns
   using Bandwidth = double; // bandwidth in GB/s (= B/ns)
   using PayloadSize = int; // payload size in bytes
+  using TopologyShapeConfigs =
+      std::vector<int>; // Additional topology shape configuration
   using TopologyConfigurations =
       std::vector<TopologyConfiguration>; // Topology configurations for each
                                           // dimension
 
   TopologyConfiguration(
+      int packages_count,
+      const TopologyShapeConfigs& shape_configs,
       Latency link_latency,
       Bandwidth link_bandwidth,
       Latency nic_latency,
@@ -27,6 +31,8 @@ struct TopologyConfiguration {
       Bandwidth hbm_bandwidth,
       double hbm_scalar) noexcept;
 
+  int getPackagesCount() const noexcept;
+  const TopologyShapeConfigs& getTopologyShapeConfigs() const noexcept;
   Latency getLinkLatency() const noexcept;
   Bandwidth getLinkBandwidth() const noexcept;
   Latency getNicLatency() const noexcept;
@@ -36,6 +42,8 @@ struct TopologyConfiguration {
   double getHbmScalar() const noexcept;
 
  private:
+  int packages_count;
+  TopologyShapeConfigs shape_configs;
   Latency link_latency;
   Bandwidth link_bandwidth;
   Latency nic_latency;

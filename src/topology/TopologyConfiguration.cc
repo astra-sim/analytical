@@ -8,6 +8,8 @@ LICENSE file in the root directory of this source tree.
 using namespace Analytical;
 
 TopologyConfiguration::TopologyConfiguration(
+    int packages_count,
+    const TopologyShapeConfigs& shape_configs,
     Latency link_latency,
     Bandwidth link_bandwidth,
     Latency nic_latency,
@@ -15,13 +17,24 @@ TopologyConfiguration::TopologyConfiguration(
     Latency hbm_latency,
     Bandwidth hbm_bandwidth,
     double hbm_scalar) noexcept
-    : link_latency(link_latency),
+    : packages_count(packages_count),
+      shape_configs(shape_configs),
+      link_latency(link_latency),
       link_bandwidth(link_bandwidth),
       nic_latency(nic_latency),
       router_latency(router_latency),
       hbm_latency(hbm_latency),
       hbm_bandwidth(hbm_bandwidth),
       hbm_scalar(hbm_scalar) {}
+
+int TopologyConfiguration::getPackagesCount() const noexcept {
+  return packages_count;
+}
+
+const TopologyConfiguration::TopologyShapeConfigs& TopologyConfiguration::
+    getTopologyShapeConfigs() const noexcept {
+  return shape_configs;
+}
 
 TopologyConfiguration::Latency TopologyConfiguration::getLinkLatency()
     const noexcept {

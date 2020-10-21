@@ -22,9 +22,9 @@ class Torus2D : public Topology {
    * @param configurations configuration for each dimension
    * @param npus_count total number of npus connected to this torus2D
    */
-  Torus2D(
-      const TopologyConfigurations& configurations,
-      int npus_count) noexcept;
+  explicit Torus2D(const TopologyConfigurations& configurations) noexcept;
+
+  ~Torus2D() override = default;
 
   Latency send(NpuId src_id, NpuId dest_id, PayloadSize payload_size) noexcept
       override;
@@ -35,18 +35,22 @@ class Torus2D : public Topology {
   NpuAddress npuIdToAddress(NpuId id) const noexcept override;
   NpuId npuAddressToId(const NpuAddress& address) const noexcept override;
 
-  int width; // width of the torus, therefore (npus_count = width * width)
+  int width; // width of the torus
+  int height; // height of the torus
   int half_width; // 1/2 of the width, used for choosing direction
+  int half_height; // 1/2 of the height, used for choosing direction
 
   /**
    * Compute which direction the index should move.
    *
    * @param src_index
    * @param dest_index
+   * @param ring_size size of the ring the packet is traversing
    * @return +1 if next_index = current_index + 1
    *         -1 if next_index = current_index - 1
    */
-  Direction computeDirection(NpuId src_index, NpuId dest_index) const noexcept;
+  Direction computeDirection(NpuId src_index, NpuId dest_index, int ring_size)
+      const noexcept;
 
   /**
    * Translate npuId to row-col pair.
@@ -69,9 +73,11 @@ class Torus2D : public Topology {
    *
    * @param current_index
    * @param direction direction to move
+   * @param ring_size size of the ring the packet is traversing
    * @return next_index after taking a step
    */
-  int takeStep(int current_index, Direction direction) const noexcept;
+  int takeStep(int current_index, Direction direction, int ring_size)
+      const noexcept;
 };
 } // namespace Analytical
 

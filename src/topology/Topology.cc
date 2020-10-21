@@ -8,6 +8,8 @@ LICENSE file in the root directory of this source tree.
 
 using namespace Analytical;
 
+Topology::~Topology() = default;
+
 void Topology::connect(NpuId src_id, NpuId dest_id, int dimension) noexcept {
   assert(
       (dimension < configurations.size()) &&
