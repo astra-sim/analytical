@@ -59,6 +59,10 @@ int main(int argc, char* argv[]) {
   cmd_parser.add_command_line_option<bool>(
       "rendezvous-protocol", "Whether to enable rendezvous protocol");
 
+  // Define network-related command line arguments here
+  cmd_parser.add_command_line_multitoken_option<std::vector<int>>(
+      "packages-counts", "Packages count per each dimension");
+
   // Parse command line arguments
   try {
     cmd_parser.parse(argc, argv);
@@ -136,6 +140,7 @@ int main(int argc, char* argv[]) {
   for (int node_per_dim : json_configuration["packages-counts"]) {
     packages_counts.emplace_back(node_per_dim);
   }
+  cmd_parser.set_if_defined("packages-counts", &packages_counts);
 
   std::vector<std::vector<int>> topology_shape_configs;
   for (const auto& topology_shape_config :
