@@ -18,16 +18,14 @@ class AllToAll : public Topology {
   /**
    * Construct an AllToAll topology.
    * @param configurations configuration per each dimension
-   * @param npus_count number of npus connected together
    */
-  AllToAll(
-      const TopologyConfigurations& configurations,
-      int npus_count) noexcept;
+  explicit AllToAll(const TopologyConfigurations& configurations) noexcept;
 
   Latency send(NpuId src_id, NpuId dest_id, PayloadSize payload_size) noexcept
       override;
 
  private:
+  int packages_count;  // the number of packages connected to this allToAll
   NpuAddress npuIdToAddress(NpuId id) const noexcept override;
   NpuId npuAddressToId(const NpuAddress& address) const noexcept override;
 };

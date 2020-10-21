@@ -17,10 +17,8 @@ class Torus2D : public Topology {
 
   /**
    * Construct a Torus2D topology.
-   * Caveat: currently only support square one.
    *
    * @param configurations configuration for each dimension
-   * @param npus_count total number of npus connected to this torus2D
    */
   explicit Torus2D(const TopologyConfigurations& configurations) noexcept;
 
@@ -37,8 +35,7 @@ class Torus2D : public Topology {
 
   int width; // width of the torus
   int height; // height of the torus
-  int half_width; // 1/2 of the width, used for choosing direction
-  int half_height; // 1/2 of the height, used for choosing direction
+  int packages_count;  // the number of packages connected to this Torus2D
 
   /**
    * Compute which direction the index should move.

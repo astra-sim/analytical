@@ -15,12 +15,14 @@ using namespace Analytical;
 Torus2D::Torus2D(const TopologyConfigurations& configurations) noexcept {
   this->configurations = configurations;
 
+  packages_count = configurations[0].getPackagesCount();
+
   auto& topology_shape_configs = configurations[0].getTopologyShapeConfigs();
   width = topology_shape_configs[0];
   height = topology_shape_configs[1];
 
   assert(
-      width * height == configurations[0].getPackagesCount() &&
+      width * height == packages_count &&
       "[Torus2D, constructor] Packages_count and (width * height) mismatches");
 
   // connect each row
@@ -62,6 +64,9 @@ Topology::Latency Torus2D::send(
     NpuId src_id,
     NpuId dest_id,
     PayloadSize payload_size) noexcept {
+  assert(0 <= src_id && src_id < packages_count && "[Torus2D, method send] src_id out of bounds");
+  assert(0 <= dest_id && dest_id < packages_count && "[Torus2D, method send] dest_id out of bounds");
+
   if (src_id == dest_id) {
     // guard statement
     return 0;

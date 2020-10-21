@@ -8,13 +8,13 @@ LICENSE file in the root directory of this source tree.
 using namespace Analytical;
 
 AllToAll::AllToAll(
-    const TopologyConfigurations& configurations,
-    int npus_count) noexcept {
+    const TopologyConfigurations& configurations) noexcept {
   this->configurations = configurations;
+  packages_count = configurations[0].getPackagesCount();
 
-  // connect all npus directly
-  for (int n1 = 0; n1 < (npus_count - 1); n1++) {
-    for (int n2 = (n1 + 1); n2 < npus_count; n2++) {
+  // connect all packages directly
+  for (int n1 = 0; n1 < (packages_count - 1); n1++) {
+    for (int n2 = (n1 + 1); n2 < packages_count; n2++) {
       connect(n1, n2, 0);
       connect(n2, n1, 0);
     }
@@ -25,6 +25,9 @@ Topology::Latency AllToAll::send(
     NpuId src_id,
     NpuId dest_id,
     PayloadSize payload_size) noexcept {
+  assert(0 <= src_id && src_id < packages_count && "[AllToAll, method send] src_id out of bounds");
+  assert(0 <= dest_id && dest_id < packages_count && "[AllToAll, method send] dest_id out of bounds");
+
   if (src_id == dest_id) {
     // guard statement
     return 0;

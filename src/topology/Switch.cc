@@ -8,16 +8,16 @@ LICENSE file in the root directory of this source tree.
 using namespace Analytical;
 
 Switch::Switch(
-    const TopologyConfigurations& configurations,
-    int npus_count) noexcept {
+    const TopologyConfigurations& configurations) noexcept {
   this->configurations = configurations;
+  packages_count = configurations[0].getPackagesCount();
 
   // set a switch id
-  switch_id = npus_count;
+  switch_id = packages_count;
 
   // 1. Connect all NPUs to a switch: input port
   // 2. Connect the switch to all NPUs: output port
-  for (auto npu_id = 0; npu_id < npus_count; npu_id++) {
+  for (auto npu_id = 0; npu_id < packages_count; npu_id++) {
     connect(npu_id, switch_id, 0); // input port
     connect(switch_id, npu_id, 0); // output port
   }
@@ -27,6 +27,9 @@ Topology::Latency Switch::send(
     NpuId src_id,
     NpuId dest_id,
     PayloadSize payload_size) noexcept {
+  assert(0 <= src_id && src_id < packages_count && "[Switch, method send] src_id out of bounds");
+  assert(0 <= dest_id && dest_id < packages_count && "[Switch, method send] dest_id out of bounds");
+
   if (src_id == dest_id) {
     // guard statement
     return 0;

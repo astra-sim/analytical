@@ -186,9 +186,9 @@ int main(int argc, char* argv[]) {
   auto event_queue = std::make_shared<Analytical::EventQueue>();
 
   // compute total number of npus by multiplying counts of each dimension
-  auto npus_count = 1;
+  auto total_npus_count = 1;
   for (auto node_per_dim : packages_counts) {
-    npus_count *= node_per_dim;
+    total_npus_count *= node_per_dim;
   }
 
   // number of nodes for each system layer dimension
@@ -199,9 +199,9 @@ int main(int argc, char* argv[]) {
 
   // Network and System layer initialization
   std::unique_ptr<Analytical::AnalyticalNetwork>
-      analytical_networks[npus_count];
-  AstraSim::Sys* systems[npus_count];
-  std::unique_ptr<AstraSim::SimpleMemory> memories[npus_count];
+      analytical_networks[total_npus_count];
+  AstraSim::Sys* systems[total_npus_count];
+  std::unique_ptr<AstraSim::SimpleMemory> memories[total_npus_count];
 
   // pointer to topology
   std::shared_ptr<Analytical::Topology> topology;
@@ -225,36 +225,26 @@ int main(int argc, char* argv[]) {
 
   // Instantiate topology
   if (topology_name == "Switch") {
-    topology = std::make_shared<Analytical::Switch>(
-        topology_configurations, // topology configuration
-        npus_count // number of connected nodes
-    );
-    nodes_count_for_system[2] = npus_count;
+    topology = std::make_shared<Analytical::Switch>(topology_configurations);
+    nodes_count_for_system[2] = total_npus_count;
   } else if (topology_name == "AllToAll") {
-    topology = std::make_shared<Analytical::AllToAll>(
-        topology_configurations, // topology configuration
-        npus_count // number of connected nodes
-    );
-    nodes_count_for_system[2] = npus_count;
+    topology = std::make_shared<Analytical::AllToAll>(topology_configurations);
+    nodes_count_for_system[2] = total_npus_count;
   } else if (topology_name == "Torus2D") {
     topology = std::make_shared<Analytical::Torus2D>(topology_configurations);
     // TODO: check system input dimension
     nodes_count_for_system[1] = topology_shape_configs[0][0];
     nodes_count_for_system[2] = topology_shape_configs[0][1];
   } else if (topology_name == "Ring") {
-    topology = std::make_shared<Analytical::Ring>(
-        topology_configurations, // topology configuration
-        npus_count, // number of connected nodes,
-        true // is the ring bidirectional
-    );
-    nodes_count_for_system[2] = npus_count;
+    topology = std::make_shared<Analytical::Ring>(topology_configurations);
+    nodes_count_for_system[2] = total_npus_count;
   } else {
     std::cout << "[Main] Topology not defined: " << topology_name << std::endl;
     exit(-1);
   }
 
   // Instantiate required network, memory, and system layers
-  for (int i = 0; i < npus_count; i++) {
+  for (int i = 0; i < total_npus_count; i++) {
     analytical_networks[i] = std::make_unique<Analytical::AnalyticalNetwork>(i);
 
     memories[i] = std::make_unique<AstraSim::SimpleMemory>(
@@ -300,7 +290,7 @@ int main(int argc, char* argv[]) {
    * Run Analytical Model
    */
   // Initialize event queue
-  for (int i = 0; i < npus_count; i++) {
+  for (int i = 0; i < total_npus_count; i++) {
     systems[i]->workload->fire();
   }
 

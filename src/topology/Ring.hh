@@ -16,13 +16,8 @@ class Ring : public Topology {
   /**
    * Construct new Ring topology.
    * @param configurations configurations per each dimension
-   * @param npus_count number of npus connected to a ring.
-   * @param bidirectional set this to true if the ring is bidirectional.
    */
-  Ring(
-      const TopologyConfigurations& configurations,
-      int npus_count,
-      bool bidirectional = true) noexcept;
+  explicit Ring(const TopologyConfigurations& configurations) noexcept;
 
   Latency send(NpuId src_id, NpuId dest_id, PayloadSize payload_size) noexcept
       override;
@@ -32,8 +27,8 @@ class Ring : public Topology {
   NpuAddress npuIdToAddress(NpuId id) const noexcept override;
   NpuId npuAddressToId(const NpuAddress& address) const noexcept override;
 
-  int npus_count;
-  int half_npus_count; // Half of the number of NPUs connected to this ring:
+  int packages_count;
+  int half_packages_count; // Half of the number of NPUs connected to this ring:
                        // used when computing direction
   bool bidirectional; // whether ring is bidirectional or unidirectional
 

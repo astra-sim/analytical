@@ -19,9 +19,8 @@ class Switch : public Topology {
    * Constrct a switch.
    * @param configurations configuration for each dimensino
    *              - Simple switch has only 1 dim
-   * @param npus_count number of npus connected to the switch
    */
-  Switch(const TopologyConfigurations& configurations, int npus_count) noexcept;
+  explicit Switch(const TopologyConfigurations& configurations) noexcept;
 
   Latency send(NpuId src_id, NpuId dest_id, PayloadSize payload_size) noexcept
       override;
@@ -30,6 +29,7 @@ class Switch : public Topology {
   NpuAddress npuIdToAddress(NpuId id) const noexcept override;
   NpuId npuAddressToId(const NpuAddress& address) const noexcept override;
 
+  int packages_count;  // the number of packages connected to this switch
   int switch_id; // id of the switch node
 };
 } // namespace Analytical

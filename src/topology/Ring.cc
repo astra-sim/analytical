@@ -8,34 +8,33 @@ LICENSE file in the root directory of this source tree.
 using namespace Analytical;
 
 Ring::Ring(
-    const TopologyConfigurations& configurations,
-    int npus_count,
-    bool bidirectional) noexcept
-    : npus_count(npus_count),
-      half_npus_count(npus_count / 2),
-      bidirectional(bidirectional) {
+    const TopologyConfigurations& configurations) noexcept {
   this->configurations = configurations;
+
+  packages_count = configurations[0].getPackagesCount();
+  half_packages_count = packages_count / 2;
+  bidirectional = configurations[0].getTopologyShapeConfigs()[0] >= 0;
 
   auto n1 = -1;
   auto n2 = -1;
 
   // 1. Unidirectional ring
-  for (n1 = 0; n1 < (npus_count - 1); n1++) {
+  for (n1 = 0; n1 < (packages_count - 1); n1++) {
     n2 = n1 + 1;
     connect(n1, n2, 0);
   }
-  n1 = npus_count - 1;
+  n1 = packages_count - 1;
   n2 = 0;
   connect(n1, n2, 0);
 
   // 2. Bidirectional ring
   if (bidirectional) {
-    for (n1 = npus_count - 1; n1 > 0; n1--) {
+    for (n1 = packages_count - 1; n1 > 0; n1--) {
       n2 = n1 - 1;
       connect(n1, n2, 0);
     }
     n1 = 0;
-    n2 = npus_count - 1;
+    n2 = packages_count - 1;
     connect(n1, n2, 0);
   }
 }
@@ -44,6 +43,9 @@ Topology::Latency Ring::send(
     NpuId src_id,
     NpuId dest_id,
     PayloadSize payload_size) noexcept {
+  assert(0 <= src_id && src_id < packages_count && "[Ring, method send] src_id out of bounds");
+  assert(0 <= dest_id && dest_id < packages_count && "[Ring, method send] dest_id out of bounds");
+
   if (src_id == dest_id) {
     // guard statement
     return 0;
@@ -90,11 +92,11 @@ Ring::Direction Ring::computeDirection(NpuId src_id, NpuId dest_id)
   // bidirectional: compute shortest path
   if (src_id < dest_id) {
     auto distance = dest_id - src_id;
-    return (distance <= half_npus_count) ? 1 : -1;
+    return (distance <= half_packages_count) ? 1 : -1;
   }
 
   auto distance = src_id - dest_id;
-  return (distance <= half_npus_count) ? -1 : 1;
+  return (distance <= half_packages_count) ? -1 : 1;
 }
 
 Ring::NpuId Ring::takeStep(NpuId current_id, Direction direction)
@@ -102,12 +104,12 @@ Ring::NpuId Ring::takeStep(NpuId current_id, Direction direction)
   // compute next id
   auto next_id = current_id + direction;
 
-  if (next_id >= npus_count) {
+  if (next_id >= packages_count) {
     // out of positive bounds
-    next_id %= npus_count;
+    next_id %= packages_count;
   } else if (next_id < 0) {
     // out of negative bounds
-    next_id = npus_count + (next_id % npus_count);
+    next_id = packages_count + (next_id % packages_count);
   }
 
   return next_id;
