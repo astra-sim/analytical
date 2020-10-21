@@ -13,10 +13,11 @@ AllToAll::AllToAll(
   packages_count = configurations[0].getPackagesCount();
 
   // connect all packages directly
-  for (int n1 = 0; n1 < (packages_count - 1); n1++) {
-    for (int n2 = (n1 + 1); n2 < packages_count; n2++) {
-      connect(n1, n2, 0);
-      connect(n2, n1, 0);
+  for (int i = 0; i < packages_count; i++) {
+    for (int j = 0; j < packages_count; j++) {
+      // When i == j, links gets constructed here
+      // but the link never gets utilized
+      connect(i, j, 0);
     }
   }
 }

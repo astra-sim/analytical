@@ -5,6 +5,7 @@ LICENSE file in the root directory of this source tree.
 
 #include "Topology.hh"
 #include <cassert>
+#include <iostream>
 
 using namespace Analytical;
 
@@ -22,6 +23,8 @@ void Topology::connect(NpuId src_id, NpuId dest_id, int dimension) noexcept {
   auto link_latency = configuration.getLinkLatency();
 
   links[src_id][dest_id] = Link(link_latency);
+
+  std::cout << "[Topology, method connect] Connect " << src_id << "->" << dest_id << " (dim " << dimension << ")" << std::endl;
 }
 
 Topology::Latency Topology::route(
