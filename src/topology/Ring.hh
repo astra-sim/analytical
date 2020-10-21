@@ -29,7 +29,7 @@ class Ring : public Topology {
 
   int packages_count;
   int half_packages_count; // Half of the number of NPUs connected to this ring:
-                       // used when computing direction
+                           // used when computing direction
   bool bidirectional; // whether ring is bidirectional or unidirectional
 
   /**

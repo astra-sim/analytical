@@ -37,7 +37,7 @@ class Torus2D : public Topology {
   int half_width; // width/2
   int height; // height of the torus
   int half_height; // height/2
-  int packages_count;  // the number of packages connected to this Torus2D
+  int packages_count; // the number of packages connected to this Torus2D
 
   /**
    * Compute which direction the index should move.
@@ -48,8 +48,10 @@ class Torus2D : public Topology {
    * @return +1 if next_index = current_index + 1
    *         -1 if next_index = current_index - 1
    */
-  Direction computeDirection(NpuId src_index, NpuId dest_index, int half_ring_size)
-      const noexcept;
+  Direction computeDirection(
+      NpuId src_index,
+      NpuId dest_index,
+      int half_ring_size) const noexcept;
 
   /**
    * Translate npuId to row-col pair.

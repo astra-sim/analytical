@@ -24,7 +24,8 @@ void Topology::connect(NpuId src_id, NpuId dest_id, int dimension) noexcept {
 
   links[src_id][dest_id] = Link(link_latency);
 
-  std::cout << "[Topology, method connect] Connect " << src_id << "->" << dest_id << " (dim " << dimension << ")" << std::endl;
+  std::cout << "[Topology, method connect] Connect " << src_id << "->"
+            << dest_id << " (dim " << dimension << ")" << std::endl;
 }
 
 Topology::Latency Topology::route(

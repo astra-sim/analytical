@@ -66,8 +66,12 @@ Topology::Latency Torus2D::send(
     NpuId src_id,
     NpuId dest_id,
     PayloadSize payload_size) noexcept {
-  assert(0 <= src_id && src_id < packages_count && "[Torus2D, method send] src_id out of bounds");
-  assert(0 <= dest_id && dest_id < packages_count && "[Torus2D, method send] dest_id out of bounds");
+  assert(
+      0 <= src_id && src_id < packages_count &&
+      "[Torus2D, method send] src_id out of bounds");
+  assert(
+      0 <= dest_id && dest_id < packages_count &&
+      "[Torus2D, method send] dest_id out of bounds");
 
   if (src_id == dest_id) {
     // guard statement
@@ -141,7 +145,6 @@ Torus2D::Direction Torus2D::computeDirection(
     NpuId src_index,
     NpuId dest_index,
     int half_ring_size) const noexcept {
-
   // bidirectional: compute shortest path
   if (src_index < dest_index) {
     auto distance = dest_index - src_index;

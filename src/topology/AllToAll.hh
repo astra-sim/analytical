@@ -25,7 +25,7 @@ class AllToAll : public Topology {
       override;
 
  private:
-  int packages_count;  // the number of packages connected to this allToAll
+  int packages_count; // the number of packages connected to this allToAll
   NpuAddress npuIdToAddress(NpuId id) const noexcept override;
   NpuId npuAddressToId(const NpuAddress& address) const noexcept override;
 };

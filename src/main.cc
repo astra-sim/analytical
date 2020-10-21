@@ -18,6 +18,7 @@ LICENSE file in the root directory of this source tree.
 #include "helper/json.hh"
 #include "topology/AllToAll.hh"
 #include "topology/Ring.hh"
+#include "topology/Ring_AllToAll.hh"
 #include "topology/Switch.hh"
 #include "topology/Topology.hh"
 #include "topology/TopologyConfiguration.hh"
@@ -238,6 +239,12 @@ int main(int argc, char* argv[]) {
   } else if (topology_name == "Ring") {
     topology = std::make_shared<Analytical::Ring>(topology_configurations);
     nodes_count_for_system[2] = total_npus_count;
+  } else if (topology_name == "Ring_AllToAll") {
+    topology =
+        std::make_shared<Analytical::Ring_AllToAll>(topology_configurations);
+    // TODO: check system input dimension
+    nodes_count_for_system[0] = packages_counts[0];
+    nodes_count_for_system[2] = packages_counts[1];
   } else {
     std::cout << "[Main] Topology not defined: " << topology_name << std::endl;
     exit(-1);
