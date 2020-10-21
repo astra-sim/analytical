@@ -32,7 +32,8 @@ int main(int argc, char* argv[]) {
   auto cmd_parser = Analytical::CommandLineParser();
 
   // Define command line arguments here
-  // 1. Network-agnostic configs
+  cmd_parser.add_command_line_option<std::string>(
+      "network-configuration", "Network configuration file");
   cmd_parser.add_command_line_option<std::string>(
       "system-configuration", "System configuration file");
   cmd_parser.add_command_line_option<std::string>(
@@ -55,29 +56,6 @@ int main(int argc, char* argv[]) {
       "stat-row", "Index of current run (index starts with 0)");
   cmd_parser.add_command_line_option<bool>(
       "rendezvous-protocol", "Whether to enable rendezvous protocol");
-
-  // 2. Network configs
-  cmd_parser.add_command_line_option<std::string>(
-      "network-configuration", "Network configuration file");
-  cmd_parser.add_command_line_option<std::string>(
-      "topology-name", "Topology name");
-  cmd_parser.add_command_line_option<int>("dims-count", "Number of dimension");
-  cmd_parser.add_command_line_multitoken_option<std::vector<int>>(
-      "nodes-per-dim", "Number of nodes per each dimension");
-  cmd_parser.add_command_line_multitoken_option<std::vector<double>>(
-      "link-bandwidth", "Link bandwidth in GB/s (B/ns)");
-  cmd_parser.add_command_line_multitoken_option<std::vector<double>>(
-      "link-latency", "Link latency in ns");
-  cmd_parser.add_command_line_multitoken_option<std::vector<double>>(
-      "nic-latency", "NIC latency in ns");
-  cmd_parser.add_command_line_multitoken_option<std::vector<double>>(
-      "router-latency", "Switch latency in ns");
-  cmd_parser.add_command_line_multitoken_option<std::vector<double>>(
-      "hbm-bandwidth", "HBM bandwidth in GB/s (B/ns)");
-  cmd_parser.add_command_line_multitoken_option<std::vector<double>>(
-      "hbm-latency", "HBM latency in ns");
-  cmd_parser.add_command_line_multitoken_option<std::vector<double>>(
-      "hbm-scale", "HBM scale");
 
   // Parse command line arguments
   try {
@@ -127,9 +105,12 @@ int main(int argc, char* argv[]) {
   cmd_parser.set_if_defined("rendezvous-protocol", &rendezvous_protocol);
 
   // 2. Retrieve network configs
-  std::string network_configuration =
-      "../../../configuration.json"; // default configuration.json
+  std::string network_configuration = ""; // default configuration.json
   cmd_parser.set_if_defined("network-configuration", &network_configuration);
+  if (network_configuration.empty()) {
+    std::cout << "[Analytical, function main] Network configuration file path not given!" << std::endl;
+    exit(-1);
+  }
 
   // parse configuration.json file
   auto json_file = std::ifstream(network_configuration, std::ifstream::in);
@@ -144,58 +125,57 @@ int main(int argc, char* argv[]) {
   json_file.close();
 
   std::string topology_name = json_configuration["topology-name"];
-  cmd_parser.set_if_defined("topology-name", &topology_name);
 
-  int dims_count = json_configuration["dims-count"];
-  cmd_parser.set_if_defined("dims-count", &dims_count);
+  int dimensions_count = json_configuration["dimensions-count"];
 
-  std::vector<int> nodes_per_dim;
-  for (int node_per_dim : json_configuration["nodes-per-dim"]) {
-    nodes_per_dim.emplace_back(node_per_dim);
+  std::vector<int> packages_count_per_dim;
+  for (int node_per_dim : json_configuration["packages-count-per-dim"]) {
+    packages_count_per_dim.emplace_back(node_per_dim);
   }
-  cmd_parser.set_if_defined("nodes-per-dim", &nodes_per_dim);
+
+  std::vector<std::vector<int>> topology_configs_per_dim;
+  for (const auto& topology_configs_of_a_dim : json_configuration["topology-configs-per-dim"]) {
+    auto& configs = topology_configs_per_dim.emplace_back(std::vector<int>());
+    for (const auto topology_config : topology_configs_of_a_dim) {
+      configs.emplace_back(topology_config);
+    }
+  }
 
   std::vector<double> link_bandwidths;
   for (double link_bandwidth : json_configuration["link-bandwidth"]) {
     link_bandwidths.emplace_back(link_bandwidth);
   }
-  cmd_parser.set_if_defined("link-bandwidth", &link_bandwidths);
 
   std::vector<double> link_latencies;
   for (double link_latency : json_configuration["link-latency"]) {
     link_latencies.emplace_back(link_latency);
   }
-  cmd_parser.set_if_defined("link-latency", &link_latencies);
 
   std::vector<double> nic_latencies;
   for (double nic_latency : json_configuration["nic-latency"]) {
     nic_latencies.emplace_back(nic_latency);
   }
-  cmd_parser.set_if_defined("nic-latency", &nic_latencies);
 
   std::vector<double> router_latencies;
   for (double router_latency : json_configuration["router-latency"]) {
     router_latencies.emplace_back(router_latency);
   }
-  cmd_parser.set_if_defined("router-latency", &router_latencies);
 
   std::vector<double> hbm_bandwidths;
   for (double hbm_bandwidth : json_configuration["hbm-bandwidth"]) {
     hbm_bandwidths.emplace_back(hbm_bandwidth);
   }
-  cmd_parser.set_if_defined("hbm-bandwidth", &hbm_bandwidths);
 
   std::vector<double> hbm_latencies;
   for (double hbm_latency : json_configuration["hbm-latency"]) {
     hbm_latencies.emplace_back(hbm_latency);
   }
-  cmd_parser.set_if_defined("hbm-latency", &hbm_latencies);
 
   std::vector<double> hbm_scales;
   for (double hbm_scale : json_configuration["hbm-scale"]) {
     hbm_scales.emplace_back(hbm_scale);
   }
-  cmd_parser.set_if_defined("hbm-scale", &hbm_scales);
+
 
   /**
    * Instantitiation: Event Queue, System, Memory, Topology, etc.
@@ -205,7 +185,7 @@ int main(int argc, char* argv[]) {
 
   // compute total number of npus by multiplying counts of each dimension
   auto npus_count = 1;
-  for (auto node_per_dim : nodes_per_dim) {
+  for (auto node_per_dim : packages_count_per_dim) {
     npus_count *= node_per_dim;
   }
 
@@ -227,7 +207,7 @@ int main(int argc, char* argv[]) {
   // topology configuration for each dimension
   auto topology_configurations =
       std::vector<Analytical::TopologyConfiguration>();
-  for (int i = 0; i < dims_count; i++) {
+  for (int i = 0; i < dimensions_count; i++) {
     topology_configurations.emplace_back(
         link_latencies[i], // link latency (ns)
         link_bandwidths[i], // link bandwidth (GB/s) = (B/ns)
