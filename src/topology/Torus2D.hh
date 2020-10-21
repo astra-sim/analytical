@@ -3,8 +3,8 @@ This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 *******************************************************************************/
 
-#ifndef __TORUS2D_H__
-#define __TORUS2D_H__
+#ifndef __TORUS2D_HH__
+#define __TORUS2D_HH__
 
 #include <vector>
 #include "Topology.hh"
@@ -34,7 +34,9 @@ class Torus2D : public Topology {
   NpuId npuAddressToId(const NpuAddress& address) const noexcept override;
 
   int width; // width of the torus
+  int half_width; // width/2
   int height; // height of the torus
+  int half_height; // height/2
   int packages_count;  // the number of packages connected to this Torus2D
 
   /**
@@ -46,7 +48,7 @@ class Torus2D : public Topology {
    * @return +1 if next_index = current_index + 1
    *         -1 if next_index = current_index - 1
    */
-  Direction computeDirection(NpuId src_index, NpuId dest_index, int ring_size)
+  Direction computeDirection(NpuId src_index, NpuId dest_index, int half_ring_size)
       const noexcept;
 
   /**

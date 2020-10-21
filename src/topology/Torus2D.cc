@@ -19,7 +19,9 @@ Torus2D::Torus2D(const TopologyConfigurations& configurations) noexcept {
 
   auto& topology_shape_configs = configurations[0].getTopologyShapeConfigs();
   width = topology_shape_configs[0];
+  half_width = width / 2;
   height = topology_shape_configs[1];
+  half_height = height / 2;
 
   assert(
       width * height == packages_count &&
@@ -88,7 +90,7 @@ Topology::Latency Torus2D::send(
 
   if (src_col != dest_col) {
     // should move x direction (i.e., move within row)
-    auto direction = computeDirection(src_col, dest_col, width);
+    auto direction = computeDirection(src_col, dest_col, half_width);
 
     auto current_col = src_col;
     while (current_col != dest_col) {
@@ -105,7 +107,7 @@ Topology::Latency Torus2D::send(
   if (src_row != dest_row) {
     // should move y direction (i.e., move within column)
     // should move x direction (i.e., move within row)
-    auto direction = computeDirection(src_row, dest_row, height);
+    auto direction = computeDirection(src_row, dest_row, half_height);
 
     auto current_row = src_row;
     while (current_row != dest_row) {
@@ -138,8 +140,7 @@ Topology::NpuId Torus2D::npuAddressToId(
 Torus2D::Direction Torus2D::computeDirection(
     NpuId src_index,
     NpuId dest_index,
-    int ring_size) const noexcept {
-  auto half_ring_size = ring_size / 2;
+    int half_ring_size) const noexcept {
 
   // bidirectional: compute shortest path
   if (src_index < dest_index) {
