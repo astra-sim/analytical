@@ -233,30 +233,30 @@ int main(int argc, char* argv[]) {
   // Instantiate topology
   if (topology_name == "Switch") {
     topology = std::make_shared<Analytical::Switch>(topology_configurations);
-    nodes_count_for_system[2] = total_npus_count;
+    nodes_count_for_system[0] = total_npus_count;
   } else if (topology_name == "AllToAll") {
     topology = std::make_shared<Analytical::AllToAll>(topology_configurations);
-    nodes_count_for_system[2] = total_npus_count;
+    nodes_count_for_system[0] = total_npus_count;
   } else if (topology_name == "Torus2D") {
     topology = std::make_shared<Analytical::Torus2D>(topology_configurations);
     // TODO: check system input dimension
-    nodes_count_for_system[1] = topology_shape_configs[0][0];
-    nodes_count_for_system[2] = topology_shape_configs[0][1];
+    nodes_count_for_system[0] = topology_shape_configs[0][0];
+    nodes_count_for_system[1] = topology_shape_configs[0][1];
   } else if (topology_name == "Ring") {
     topology = std::make_shared<Analytical::Ring>(topology_configurations);
-    nodes_count_for_system[2] = total_npus_count;
+    nodes_count_for_system[0] = total_npus_count;
   } else if (topology_name == "Ring_AllToAll") {
     topology =
         std::make_shared<Analytical::Ring_AllToAll>(topology_configurations);
     // TODO: check system input dimension
     nodes_count_for_system[0] = packages_counts[0];
-    nodes_count_for_system[2] = packages_counts[1];
+    nodes_count_for_system[1] = packages_counts[1];
   } else if (topology_name == "Ring_AllToAll_Switch") {
     topology = std::make_shared<Analytical::Ring_AllToAll_Switch>(
         topology_configurations);
     nodes_count_for_system[0] = packages_counts[0];
-    nodes_count_for_system[1] = packages_counts[2];
-    nodes_count_for_system[2] = packages_counts[1];
+    nodes_count_for_system[1] = packages_counts[1];
+    nodes_count_for_system[2] = packages_counts[2];
   } else {
     std::cout << "[Main] Topology not defined: " << topology_name << std::endl;
     exit(-1);
