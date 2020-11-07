@@ -4,6 +4,7 @@ LICENSE file in the root directory of this source tree.
 *******************************************************************************/
 
 #include "TopologyConfiguration.hh"
+#include <assert.h>
 
 using namespace Analytical;
 
