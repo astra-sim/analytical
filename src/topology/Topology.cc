@@ -6,6 +6,7 @@ LICENSE file in the root directory of this source tree.
 #include "Topology.hh"
 #include <cassert>
 #include <iostream>
+#include <assert.h>
 
 using namespace Analytical;
 
