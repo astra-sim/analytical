@@ -9,6 +9,7 @@ LICENSE file in the root directory of this source tree.
 #include <iostream>
 #include <tuple>
 #include <utility>
+#include <assert.h>
 
 using namespace Analytical;
 
